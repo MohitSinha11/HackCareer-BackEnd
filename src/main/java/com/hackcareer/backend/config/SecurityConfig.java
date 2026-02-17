@@ -33,6 +33,8 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     @Value("${app.cors.allowed-origins:http://localhost:5173,http://127.0.0.1:5173}")
     private String allowedOrigins;
+    @Value("${app.cors.allowed-origin-patterns:https://*.vercel.app}")
+    private String allowedOriginPatterns;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -81,7 +83,13 @@ public class SecurityConfig {
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
                 .collect(Collectors.toList());
+        List<String> originPatterns = List.of(allowedOriginPatterns.split(","))
+                .stream()
+                .map(String::trim)
+                .filter(pattern -> !pattern.isEmpty())
+                .collect(Collectors.toList());
         configuration.setAllowedOrigins(origins);
+        configuration.setAllowedOriginPatterns(originPatterns);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
